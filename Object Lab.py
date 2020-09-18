@@ -6,7 +6,9 @@ import pymunk.pygame_util
 from data.objects.Geometry import *
 from data.ToolBox import *
 from data.ToolBoxOverlay import *
-from data.objects.RagdollV1 import *
+from data.objects.RagdollV2 import *
+from data.objects.RagdollV5 import *
+
 # Game Settings
 
 # Physics Constants
@@ -47,7 +49,7 @@ class Engine:
         self.mouseTools = ToolBox(self.space, self.UIOffset)
         self.toolsOverlay = ToolsOverlay(SCREEN_WIDTH, self.UIOffset[1], self.mouseTools)
         self._running = True
-        self._run_physics = True
+        self._run_physics = False
         self.frameCount = 0
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         # self.UISurface = pygame.Surface([SCREEN_WIDTH, self.UIOffset[1]])
@@ -82,18 +84,24 @@ class Engine:
         self.leftWall.addToSpace(self.space)
         self.rightWall.addToSpace(self.space)
 
-        self.ragdoll = DummyV1(self.space, self.GameSurface_rect.center)
-        self.ragdoll.addToSpace()
+        # self.ragdoll1 = RagdollV2(self.space, (self.GameSurface_rect.center[0] - 250, self.GameSurface_rect.center[1]))
+        # self.ragdoll1.addToSpace()
+
+        self.ragdoll2 = RagdollV4(self.space, (self.GameSurface_rect.center[0] + 250, self.GameSurface_rect.center[1]))
+        self.ragdoll2.addToSpace()
 
     def on_loop(self):
         self.mouseTools.update_pos()
+        self.ragdoll2.upperTorso.standup()
+        self.ragdoll2.on_loop()
+        # print(self.ragdoll2.head.body.velocity)
         pass
 
     def on_event(self, event):
         self.quit_check(event)
         self.mouseTools.on_event(event)
         self.physicsToggle(event)
-
+        self.ragdoll2.on_event(event)
         pass
 
     def on_render(self):
@@ -102,8 +110,8 @@ class Engine:
         self.toolsOverlay.on_render(self.screen)
         self.GameSurface.fill((120, 120, 120))
         # Draw the mouse tool
-        self.mouseTools.draw(self.GameSurface)
         self.space.debug_draw(self.draw_options)
+        self.mouseTools.draw(self.GameSurface)
 
 
 

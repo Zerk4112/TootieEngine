@@ -1,7 +1,7 @@
 import pygame
 import pymunk
 
-class DummyV1:
+class RagdollV1:
     def __init__(self, space, pos):
         self.default_friction = 0.99
         self.space = space
