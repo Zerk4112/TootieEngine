@@ -70,16 +70,6 @@ class RagdollV4:
 
         # if event.type == KEYDOWN and event.key == K_h:
         #     self.toggle_Standing()
-    def on_loop(self):
-        pass
-        # self.head.body.apply_force_at_world_point((0, -950 * 3), self.head.body.position)
-        # self.upperTorso.body.apply_force_at_world_point((0, -650 ** 2), self.upperTorso.body.position)
-
-        # if self.head.body.angle < 0:
-        #     self.head.body.angle += 0.1
-        # if self.head.body.angle > 0:
-        #     self.head.body.angle -= 0.1
-        pass
 
     def addToSpace(self):
         self.upperTorso.addToSpace()
@@ -151,17 +141,6 @@ class UpperTorso(BodyPart):
         self.setShape()
         self.shape.filter = self.parent.torsoFilter
 
-    def standup(self):
-        pass
-        # if self.body.angle < 5:
-        #     self.body.angle += 0.0415
-        #     # print("Stant Right?")
-        # if self.body.angle > 0:
-        #     self.body.angle -= 0.0415
-        #     # print("Stand Left!")
-
-        # self.parent.standing_joint.update_pos()
-        pass
 
 
 class LowerTorso(BodyPart_WithJoint):

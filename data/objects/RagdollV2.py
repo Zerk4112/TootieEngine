@@ -50,11 +50,11 @@ class BodyPart:
         self.space.add(self.body, self.shape)
 
     def setJointPos(self):
-        self.joint_pos = (self.parent.upperTorso.body.position[0] + self.joint_offset[0],
-                          self.parent.upperTorso.body.position[1] + self.joint_offset[1])
+        self.joint_pos = (self.parent.Torso.body.position[0] + self.joint_offset[0],
+                          self.parent.Torso.body.position[1] + self.joint_offset[1])
 
     def createJoint(self):
-        self.joint = pymunk.PivotJoint(self.body, self.parent.upperTorso.body, self.joint_pos)
+        self.joint = pymunk.PivotJoint(self.body, self.parent.Torso.body, self.joint_pos)
         self.space.add(self.joint)
 
     def setShape(self):

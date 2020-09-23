@@ -100,10 +100,12 @@ class ToolBox:
         self.offset_vector = offset
         self.isCircle = True
         # self.space.add(self.shape)
+        self.camera_offset = (0, 0)
 
-    def update_pos(self):
+    def update_pos(self, camera_offset):
         mousePOS = pygame.mouse.get_pos()
-        self.pos = (mousePOS[0] - self.offset_vector[0], mousePOS[1] - self.offset_vector[1])
+        self.camera_offset = camera_offset
+        self.pos = (mousePOS[0] - self.offset_vector[0] - self.camera_offset[0], mousePOS[1] - self.offset_vector[1] - self.camera_offset[1])
         self.body.position = self.pos
 
     def switch_cursor_shape(self, event):
@@ -168,16 +170,16 @@ class ToolBox:
     def on_event(self, event):
         self.switch_toolset(event)
         self.switch_tool(event)
-        self.update_radius(event)
+        # self.update_radius(event)
         self.switch_cursor_shape(event)
         if self.current_tool is not None:
             if self.current_tool["tool"] is not None:
                 self.current_tool["tool"].event_handler(event)
         pass
 
-    def draw(self, surface):
+    def draw(self, surface, offset):
         if self.isCircle:
-            pygame.draw.circle(surface, (0, 0, 0), (int(self.body.position.x), int(self.body.position.y)),self.radius)
+            pygame.draw.circle(surface, (0, 0, 0), (int(self.body.position.x + offset[0]), int(self.body.position.y + offset[1])),self.radius)
         else:
             pygame.draw.rect(surface, (0, 0, 0), (int(self.body.position.x - (self.radius / 2)), int(self.body.position.y - (self.radius / 2)), self.radius, self.radius))
         pass
@@ -258,8 +260,8 @@ class grabTool:
         space.add(self.joint)
 
     def detect_joint(self, event):
-        p = (event.pos[0] - self.parent.offset_vector[0], event.pos[1] - self.parent.offset_vector[1])
-        hit = self.parent.space.point_query_nearest((p), self.parent.radius, pymunk.ShapeFilter())
+        p = (event.pos[0] - self.parent.offset_vector[0] - self.parent.camera_offset[0], event.pos[1] - self.parent.offset_vector[1] - self.parent.camera_offset[1])
+        hit = self.parent.space.point_query_nearest(p, self.parent.radius, pymunk.ShapeFilter())
         if hit is not None and hit.shape.body.body_type == pymunk.Body.DYNAMIC:
             shape = hit.shape
             if hit.distance > 0:
