@@ -22,6 +22,16 @@ class CameraSurface:
         self.yVel = 0
         self.following = True
 
+    def on_loop(self):
+        self.update_pos()
+
+    def on_event(self, event):
+        self.controller(event)
+
+    def on_render(self):
+        self.update_render()
+        self.draw_render()
+
     def update_render(self):
         # Fill UI Display with gray
         self.cameraDisplay.fill((120, 120, 120))

@@ -2,8 +2,6 @@ import sys
 import pygame.color
 from pygame.locals import *
 import pymunk.pygame_util
-from data.ui.MapUIOverlay import *
-from data.ui.Camera import *
 
 # Game Settings
 
@@ -27,37 +25,24 @@ PHYSICS_FPS = 60.0
 
 # Pygame Constants
 PYGAME_FPS = 60
-SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 900
+SCREEN_WIDTH, SCREEN_HEIGHT = 480, 320
 SCREEN_CENTER = SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2
-MAP_WIDTH, MAP_HEIGHT = 2000, 1000
-MAP_CENTER = MAP_WIDTH / 2, MAP_HEIGHT / 2
+
 # Global Value Defaults
 
 
 class Engine:
     def __init__(self):
         # Define Constants
-        self.UIOffset = (0, 100)
         self._running = True
         self._run_physics = True
 
-        # Define initial frame count
         self.frameCount = 0
-
-        # Define screen to draw all surfaces on
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-        ## Define surface to draw everything onto
-        self.GameSurface = pygame.Surface([MAP_WIDTH, MAP_HEIGHT - self.UIOffset[1]])
-        self.GameSurface_rect = self.GameSurface.get_rect()
-
-        self.draw_options = pymunk.pygame_util.DrawOptions(self.GameSurface)
-        pygame.display.set_caption("~~~ TootieEngine Map Laboratory ~~~")
+        self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
+        pygame.display.set_caption("Object Oriented Template")
         # Create space and init pygame
-        self.guiOverlay = UISurface(SCREEN_WIDTH, self.UIOffset[1], self.screen)
 
-        # Define camera object
-        self.camera = CameraSurface(MAP_WIDTH, MAP_HEIGHT - self.UIOffset[1], self.GameSurface, (0, 0))
         pass
     def physicsTick(self):
         if self._run_physics:
@@ -74,23 +59,17 @@ class Engine:
 
     def on_loop(self):
         self.physicsTick()
-        self.camera.update_pos()
         pass
 
     def on_event(self, event):
         self.quit_check(event)
-        self.camera.controller(event)
-
         pass
 
     def on_render(self):
         # Fill with white
         self.screen.fill((255, 255, 255))
-        self.GameSurface.fill((120, 120, 120))
-        self.guiOverlay.on_render()
-        self.camera.update_render()
-        self.camera.draw_render()
-        self.screen.blit(self.GameSurface, self.UIOffset)
+
+
         pygame.display.flip()
         pygame.display.update()
         self.clock.tick(PYGAME_FPS)

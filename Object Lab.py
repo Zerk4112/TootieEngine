@@ -109,6 +109,7 @@ class Engine:
         self.mouseTools.on_event(event)
         self.physicsToggle(event)
         # self.ragdoll2.on_event(event)
+        self.camera.on_event(event)
         self.camera.controller(event)
         self.current_player.controller(event)
         pass
@@ -118,9 +119,11 @@ class Engine:
         self.screen.fill((255, 255, 255))
         self.toolsOverlay.on_render(self.screen)
         self.GameSurface.fill((120, 120, 120))
+        # Update what is being rendered on the camera surface
         self.camera.update_render()
+        # Draw debug stuff
         self.space.debug_draw(self.draw_options)
-
+        # Draw all of everything on the camera surface
         self.camera.draw_render()
         # Draw the mouse tool
         self.mouseTools.draw(self.GameSurface, (self.camera.x, self.camera.y))
