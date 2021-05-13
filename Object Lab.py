@@ -6,7 +6,10 @@ import pymunk.pygame_util
 from data.objects.Geometry import *
 from data.ToolBox import *
 from data.ToolBoxOverlay import *
-from data.objects.RagdollV1 import *
+from data.objects.RagdollV2 import *
+from data.objects.RagdollV5 import *
+from data.ui.Camera import *
+from data.objects.player.CharacterV1 import *
 # Game Settings
 
 # Physics Constants
@@ -29,9 +32,11 @@ PHYSICS_FPS = 60.0
 
 # Pygame Constants
 PYGAME_FPS = 60
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+SCREEN_WIDTH, SCREEN_HEIGHT = 1200, 900
 SCREEN_CENTER = SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2
 
+MAP_WIDTH, MAP_HEIGHT = 1200, 900
+MAP_CENTER = MAP_WIDTH / 2, MAP_HEIGHT / 2
 
 # Global Value Defaults
 
@@ -47,15 +52,15 @@ class Engine:
         self.mouseTools = ToolBox(self.space, self.UIOffset)
         self.toolsOverlay = ToolsOverlay(SCREEN_WIDTH, self.UIOffset[1], self.mouseTools)
         self._running = True
-        self._run_physics = True
+        self._run_physics = False
         self.frameCount = 0
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         # self.UISurface = pygame.Surface([SCREEN_WIDTH, self.UIOffset[1]])
-        self.GameSurface = pygame.Surface([SCREEN_WIDTH, SCREEN_HEIGHT - self.UIOffset[1]])
+        self.GameSurface = pygame.Surface([MAP_WIDTH, MAP_HEIGHT])
         self.GameSurface_rect = self.GameSurface.get_rect()
+        self.camera = CameraSurface(MAP_WIDTH, MAP_HEIGHT, self.GameSurface, SCREEN_CENTER)
 
-
-        self.draw_options = pymunk.pygame_util.DrawOptions(self.GameSurface)
+        self.draw_options = pymunk.pygame_util.DrawOptions(self.camera.cameraDisplay)
         self.clock = pygame.time.Clock()
 
         pygame.display.set_caption("~~~ TootieEngine Laboratory ~~~")
@@ -72,28 +77,41 @@ class Engine:
         self._running = True
 
         # Define Room walls
-        self.ceiling = KinematicBoundary((0, 0), (SCREEN_WIDTH, 0), 20, (0, 0, 0))
-        self.floor = KinematicBoundary((0, SCREEN_CENTER[1] + 250), (SCREEN_WIDTH, SCREEN_CENTER[1] + 250), 20, (0, 0, 0))
-        self.leftWall = KinematicBoundary((0, 0), (0, SCREEN_HEIGHT), 20, (0, 0, 0))
-        self.rightWall = KinematicBoundary((SCREEN_WIDTH, 0), (SCREEN_WIDTH, SCREEN_HEIGHT), 20, (0, 0, 0))
+        self.ceiling = KinematicBoundary((0, 0), (MAP_WIDTH, 0), 20, (0, 0, 0))
+        self.floor = KinematicBoundary((0, MAP_HEIGHT), (MAP_WIDTH, MAP_HEIGHT), 20, (0, 0, 0))
+        self.leftWall = KinematicBoundary((0, 0), (0, MAP_HEIGHT), 20, (0, 0, 0))
+        self.rightWall = KinematicBoundary((MAP_WIDTH, 0), (MAP_WIDTH, MAP_HEIGHT), 20, (0, 0, 0))
 
         self.ceiling.addToSpace(self.space)
         self.floor.addToSpace(self.space)
         self.leftWall.addToSpace(self.space)
         self.rightWall.addToSpace(self.space)
 
-        self.ragdoll = DummyV1(self.space, self.GameSurface_rect.center)
-        self.ragdoll.addToSpace()
+        # self.ragdoll1 = RagdollV2(self.space, (self.GameSurface_rect.center[0] - 250, self.GameSurface_rect.center[1]))
+        # self.ragdoll1.addToSpace()
+
+        # self.ragdoll2 = RagdollV4(self.space, (self.camera.cameraDisplay_rect.center[0], self.camera.cameraDisplay_rect.center[1]))
+        # self.ragdoll2.addToSpace()
+
+        self.current_player = PlayerV1(self.space, MAP_CENTER, self.camera.surface)
+        self.current_player.addToSpace()
 
     def on_loop(self):
-        self.mouseTools.update_pos()
+        self.camera.update_pos()
+        self.camera.follow(self.current_player)
+        self.mouseTools.update_pos((self.camera.x, self.camera.y))
+        self.current_player.on_loop()
+        # print(self.ragdoll2.head.body.velocity)
         pass
 
     def on_event(self, event):
         self.quit_check(event)
         self.mouseTools.on_event(event)
         self.physicsToggle(event)
-
+        # self.ragdoll2.on_event(event)
+        self.camera.on_event(event)
+        self.camera.controller(event)
+        self.current_player.controller(event)
         pass
 
     def on_render(self):
@@ -101,13 +119,19 @@ class Engine:
         self.screen.fill((255, 255, 255))
         self.toolsOverlay.on_render(self.screen)
         self.GameSurface.fill((120, 120, 120))
-        # Draw the mouse tool
-        self.mouseTools.draw(self.GameSurface)
+        # Update what is being rendered on the camera surface
+        self.camera.update_render()
+        # Draw debug stuff
         self.space.debug_draw(self.draw_options)
+        # Draw all of everything on the camera surface
+        self.camera.draw_render()
+        # Draw the mouse tool
+        self.mouseTools.draw(self.GameSurface, (self.camera.x, self.camera.y))
 
 
 
         self.screen.blit(self.GameSurface, self.UIOffset)
+
         # self.platform.draw(self.screen)
 
         pygame.display.flip()
